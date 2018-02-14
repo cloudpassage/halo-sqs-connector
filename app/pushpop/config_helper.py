@@ -1,6 +1,7 @@
 """This file contains configuration management functionality."""
 import datetime
 import os
+import re
 
 
 class ConfigHelper(object):
@@ -13,6 +14,7 @@ class ConfigHelper(object):
         halo_api_secret(str): Halo API secret.
         halo_api_hostname(str): Hostname for Halo API.
         halo_module(str): ``events`` or ``scans``
+        integration_name(str): Name of this integration
         application_mode(str): ``push`` or ``pop``
         sqs_queue_url(str): URL for SQS queue.
         start_time(str): Timestamp for start of query.
@@ -30,6 +32,7 @@ class ConfigHelper(object):
         self.application_mode = None
         self.sqs_queue_url = None
         self.start_time = None
+        self.integration_name = "Halo-SQS-PushPop/%s" % self.get_app_version()
         # Now set according to env.
         self.set_config_vars_from_env()
         # Make sure we have everything we need.
@@ -83,3 +86,13 @@ class ConfigHelper(object):
     @classmethod
     def get_now_timestamp(cls):
         return datetime.now().isoformat()
+
+    @classmethod
+    def get_app_version(cls):
+        init_loc = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                "__init__.py")
+        with open(init_loc) as initfile:
+            raw_init_file = initfile.read()
+        rx_compiled = re.compile(r"\s*__version__\s*=\s*\"(\S+)\"")
+        ver = rx_compiled.search(raw_init_file).group(1)
+        return ver
