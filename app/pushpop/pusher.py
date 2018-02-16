@@ -1,7 +1,9 @@
 """This file contains functionality for pushing Halo data into SQS."""
 from haloevents import HaloEvents
 from haloscans import HaloScans
+from utility import Utility
 import boto3
+import json
 
 
 class Pusher(object):
@@ -24,12 +26,20 @@ class Pusher(object):
             stream = HaloScans(self.config.halo_key,
                                self.config.halo_secret,
                                api_host=self.config.halo_api_hostname,
+                               search_params={"since": self.config.start_time,
+                                              "sort_by": "created_at.asc"},
                                start_timestamp=self.config.start_time,
                                integration_name=self.config.integration_name)
         return stream
 
+    def print_start_message(self):
+        print("Starting pusher.\n  Queue: %s\n  Start time: %s\n  Module: %s" %
+              (self.config.sqs_queue_url, self.config.start_time,
+               self.config.halo_module))
+
     def run(self):
         """Send every item produced by the configured Halo stream to SQS."""
+        self.print_start_message()
         for item in self.halo_stream:
             self.send_item_to_sqs(item)
         return
@@ -45,5 +55,7 @@ class Pusher(object):
                                "StringValue": self.config.halo_module}}
         self.sqs.send_message(QueueUrl=self.config.sqs_queue_url,
                               MessageAttributes=message_attributes,
-                              MessageBody=item)
+                              MessageBody=Utility.pack_message(
+                                  json.dumps(item))
+                              )
         return

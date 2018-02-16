@@ -1,6 +1,9 @@
 """This file contains functionality to pop Halo data from SQS to stdout."""
+from utility import Utility
 import boto3
+import json
 import pprint
+import sys
 
 
 class Popper(object):
@@ -13,14 +16,18 @@ class Popper(object):
     def run(self):
         """Send every item produced by the configured Halo stream to SQS."""
         while True:
-            pprint.pprint(self.pop_item_from_sqs()["body"])
+            try:
+                pprint.pprint(json.loads(self.pop_item_from_sqs()["Body"]))
+            except KeyError:
+                print("\nYou reached the end of the event stream!\n\tExiting.")
+                sys.exit(0)
         return
 
     def pop_item_from_sqs(self):
         """Pop one item from SQS."""
         response = self.sqs.receive_message(QueueUrl=self.config.sqs_queue_url,
                                             MaxNumberOfMessages=1)
-        message = response["messages"][0]
+        message = response["Messages"][0]
         self.sqs.delete_message(QueueUrl=self.config.sqs_queue_url,
                                 ReceiptHandle=message["ReceiptHandle"])
-        return message
+        return Utility.unpack_message(message)

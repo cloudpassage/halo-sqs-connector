@@ -1,5 +1,5 @@
 """This file contains configuration management functionality."""
-import datetime
+import cloudpassage
 import os
 import re
 
@@ -10,6 +10,7 @@ class ConfigHelper(object):
     Attributes:
         aws_key(str): AWS API key.
         aws_secret(str): AWS API secret.
+        aws_default_region(str): AWS region.
         halo_api_key(str): Halo API key.
         halo_api_secret(str): Halo API secret.
         halo_api_hostname(str): Hostname for Halo API.
@@ -25,9 +26,10 @@ class ConfigHelper(object):
         # Initialize all None
         self.aws_key = None
         self.aws_secret = None
+        self.aws_default_region = None
         self.halo_key = None
         self.halo_secret = None
-        self.halo_api_hostname = None
+        self.halo_api_hostname = "api.cloudpassage.com"
         self.halo_module = None
         self.application_mode = None
         self.sqs_queue_url = None
@@ -43,6 +45,7 @@ class ConfigHelper(object):
         """Check that all necessary variables are set for application mode."""
         # Generally required settings
         gen_req = {"AWS SQS queue URL": self.sqs_queue_url,
+                   "AWS default region": self.aws_default_region,
                    "AWS API key": self.aws_key,
                    "AWS API secret": self.aws_secret,
                    "Application mode": self.application_mode,
@@ -50,8 +53,7 @@ class ConfigHelper(object):
         # Required only to push Halo data to SQS queue.
         push_req = {"Halo API key": self.halo_key,
                     "Halo API secret": self.halo_secret,
-                    "Halo API hostname": self.halo_api_hostname,
-                    "Start time": self.start_time}
+                    "Halo API hostname": self.halo_api_hostname}
         if self.application_mode not in ["push", "pop"]:
             raise ValueError("Application mode must be \"push\" or \"pop\".")
         if self.halo_module not in ["events", "scans"]:
@@ -67,6 +69,8 @@ class ConfigHelper(object):
             msg = ("Unable to initialize config.  Missing settings:" %
                    ", ".join(missing_settings))
             raise ValueError(msg)
+        if self.application_mode == "push" and self.start_time is None:
+            self.start_time = self.get_last_timestamp()
         return
 
     def set_config_vars_from_env(self):
@@ -78,14 +82,25 @@ class ConfigHelper(object):
                    "HALO_API_SECRET_KEY": "halo_secret",
                    "HALO_API_HOSTNAME": "halo_api_hostname",
                    "HALO_MODULE": "halo_module",
-                   "SQS_QUEUE_URL": "sqs_queue_url"}
+                   "SQS_QUEUE_URL": "sqs_queue_url",
+                   "START_TIME": "start_time"}
         for envvar, varname in targets.items():
             setattr(self, varname, os.getenv(envvar))
         return
 
-    @classmethod
-    def get_now_timestamp(cls):
-        return datetime.now().isoformat()
+    def get_last_timestamp(self):
+        """Get latest object's timestamp from Halo API."""
+        if self.halo_module == "scans":
+            url = "/v1/scans?sort_by=created_at.desc&per_page=1"
+        elif self.halo_module == "events":
+            url = "/v1/events?sort_by=created_at.desc&per_page=1"
+        else:
+            print("Unrecognized module: %s" % self.halo_module)
+        session = cloudpassage.HaloSession(self.halo_key, self.halo_secret,
+                                           api_host=self.halo_api_hostname)
+        http_helper = cloudpassage.HttpHelper(session)
+        timestamp = http_helper.get(url)[self.halo_module][0]["created_at"]
+        return timestamp
 
     @classmethod
     def get_app_version(cls):
