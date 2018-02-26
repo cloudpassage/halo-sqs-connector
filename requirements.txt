@@ -1,3 +1,3 @@
 boto3~=1.5
-https://github.com/cloudpassage/halo-scans/archive/feature/retry_for_incomplete_state.zip
-https://github.com/cloudpassage/halo-events/archive/v0.10.4.zip
+https://github.com/cloudpassage/halo-scans/archive/v0.15.zip
+https://github.com/cloudpassage/halo-events/archive/v0.11.zip
