@@ -14,12 +14,12 @@ class Popper(object):
         return
 
     def run(self):
-        """Send every item produced by the configured Halo stream to SQS."""
+        """Retrieve and unpack Halo data from SQS, and print it to stdout."""
         while True:
             try:
                 pprint.pprint(json.loads(self.pop_item_from_sqs()["Body"]))
             except KeyError:
-                print("\nYou reached the end of the event stream!\n\tExiting.")
+                print("\nYou reached the end of the data stream!\n\tExiting.")
                 sys.exit(0)
         return
 
