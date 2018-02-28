@@ -17,7 +17,7 @@ class Popper(object):
         """Retrieve and unpack Halo data from SQS, and print it to stdout."""
         while True:
             try:
-                pprint.pprint(json.loads(self.pop_item_from_sqs()["Body"]))
+                pprint.pprint(json.loads(self.pop_item_from_sqs()))
             except KeyError:
                 print("\nYou reached the end of the data stream!\n\tExiting.")
                 sys.exit(0)
@@ -30,4 +30,5 @@ class Popper(object):
         message = response["Messages"][0]
         self.sqs.delete_message(QueueUrl=self.config.sqs_queue_url,
                                 ReceiptHandle=message["ReceiptHandle"])
-        return Utility.unpack_message(message)
+        retval = Utility.unpack_message(message["Body"])
+        return retval
