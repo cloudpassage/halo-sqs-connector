@@ -29,7 +29,8 @@ class Pusher(object):
                                search_params={"since": self.config.start_time,
                                               "sort_by": "created_at.asc"},
                                start_timestamp=self.config.start_time,
-                               integration_name=self.config.integration_name)
+                               integration_name=self.config.integration_name,
+                               report_performance=True)
         return stream
 
     def print_start_message(self):
