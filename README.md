@@ -34,7 +34,7 @@ libraries are required.
 | AWS_SECRET_ACCESS_KEY   | AWS API secret.                                 |
 | AWS_DEFAULT_REGION      | Region for SQS queue.                           |
 | HALO_API_KEY            | API key for Halo. Only required for push.       |
-| HALO_API_SECRET_KEY     | API secret for Halo. Only required for pop.     |
+| HALO_API_SECRET_KEY     | API secret for Halo. Only required for push.    |
 | HALO_API_HOSTNAME       | Optional. Defaults to `api.cloudpassage.com`    |
 | HALO_MODULE             | Must be set to `events` or `scans`              |
 | SQS_QUEUE_URL           | AWS SQS Queue URL.                              |
