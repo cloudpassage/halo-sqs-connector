@@ -1,6 +1,6 @@
 from config_helper import ConfigHelper  # NOQA
-from popper import Popper  # NOQA
-from pusher import Pusher  # NOQA
+from receiver import Receiver  # NOQA
+from sender import Sender  # NOQA
 from utility import Utility  # NOQA
 
 

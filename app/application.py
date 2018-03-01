@@ -1,19 +1,19 @@
 """This file contains the top level logic for the halo-sqs-push-pop utility."""
 
-import pushpop
+import halosqs
 import sys
 
 
 def main():
     try:
-        config = pushpop.ConfigHelper()
+        config = halosqs.ConfigHelper()
     except ValueError as e:
         print("Configuration problem: %s" % e)
         sys.exit(1)
-    if config.application_mode == "push":
-        runner = pushpop.Pusher(config)
-    elif config.application_mode == "pop":
-        runner = pushpop.Popper(config)
+    if config.application_mode == "send":
+        runner = halosqs.Sender(config)
+    elif config.application_mode == "receive":
+        runner = halosqs.Receiver(config)
     runner.run()
     return
 

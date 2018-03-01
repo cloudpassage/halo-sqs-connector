@@ -1,4 +1,4 @@
-"""This file contains functionality for pushing Halo data into SQS."""
+"""This file contains functionality for sending Halo data into SQS."""
 from haloevents import HaloEvents
 from haloscans import HaloScans
 from utility import Utility
@@ -6,8 +6,8 @@ import boto3
 import json
 
 
-class Pusher(object):
-    """Initialize with an instance of ``pushpop.ConfigHelper``."""
+class Sender(object):
+    """Initialize with an instance of ``halosqs.ConfigHelper``."""
     def __init__(self, config):
         self.config = config
         self.halo_stream = self.build_halo_stream()
@@ -34,7 +34,7 @@ class Pusher(object):
         return stream
 
     def print_start_message(self):
-        print("Starting pusher.\n  Queue: %s\n  Start time: %s\n  Module: %s" %
+        print("Starting sender.\n  Queue: %s\n  Start time: %s\n  Module: %s" %
               (self.config.sqs_queue_url, self.config.start_time,
                self.config.halo_module))
 

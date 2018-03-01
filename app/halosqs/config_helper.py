@@ -16,7 +16,7 @@ class ConfigHelper(object):
         halo_api_hostname(str): Hostname for Halo API.
         halo_module(str): ``events`` or ``scans``
         integration_name(str): Name of this integration
-        application_mode(str): ``push`` or ``pop``
+        application_mode(str): ``send`` or ``receive``
         sqs_queue_url(str): URL for SQS queue.
         start_time(str): Timestamp for start of query.
     """
@@ -34,7 +34,7 @@ class ConfigHelper(object):
         self.application_mode = None
         self.sqs_queue_url = None
         self.start_time = None
-        self.integration_name = "Halo-SQS-PushPop/%s" % self.get_app_version()
+        self.integration_name = "Halo-SQS/%s" % self.get_app_version()
         # Now set according to env.
         self.set_config_vars_from_env()
         # Make sure we have everything we need.
@@ -48,28 +48,28 @@ class ConfigHelper(object):
                    "AWS default region": self.aws_default_region,
                    "AWS API key": self.aws_key,
                    "AWS API secret": self.aws_secret,
-                   "Application mode": self.application_mode,
-                   "Halo module": self.halo_module}
-        # Required only to push Halo data to SQS queue.
-        push_req = {"Halo API key": self.halo_key,
+                   "Application mode": self.application_mode}
+        # Required only to send Halo data to SQS queue.
+        send_req = {"Halo API key": self.halo_key,
                     "Halo API secret": self.halo_secret,
-                    "Halo API hostname": self.halo_api_hostname}
-        if self.application_mode not in ["push", "pop"]:
-            raise ValueError("Application mode must be \"push\" or \"pop\".")
+                    "Halo API hostname": self.halo_api_hostname,
+                    "Halo module": self.halo_module}
+        if self.application_mode not in ["send", "receive"]:
+            raise ValueError("Mode must be \"send\" or \"receive\".")
         if self.halo_module not in ["events", "scans"]:
             raise ValueError("Halo module must be \"events\" or \"scans\".")
         # Find missing settings for generall requirements
         missing_settings = [x[0] for x in gen_req if x[1] is None]
-        # If we're pushing to queue, check for a few more settings.
-        if self.application_mode == "push":
-            missing_settings.extend([x[0] for x in push_req if x[1] is None])
+        # If we're sending to queue, check for a few more settings.
+        if self.application_mode == "send":
+            missing_settings.extend([x[0] for x in send_req if x[1] is None])
         # If any required settings are missing, raise ValueError with a
         # meaningful message.
         if missing_settings:
             msg = ("Unable to initialize config.  Missing settings:" %
                    ", ".join(missing_settings))
             raise ValueError(msg)
-        if self.application_mode == "push" and self.start_time is None:
+        if self.application_mode == "send" and self.start_time is None:
             self.start_time = self.get_last_timestamp()
         return
 
