@@ -40,7 +40,7 @@ libraries are required.
 | SQS_QUEUE_URL           | AWS SQS Queue URL.                                                |
 | START_TIME              | ISO8601 timestamp for start of stream.                            |
 | SCAN_TIMEOUT            | Optional. Seconds to wait for scan completion.  Default: 360      |
-| SCAN_FILTER             | Optional. Set filters for scan retrieval..  See 'Filters', below. |
+| SCAN_FILTER             | Optional. Set filters for scan retrieval.  See 'Filters', below.  |
 
 ### Filters:
 
@@ -105,7 +105,8 @@ parent group for the assets you wish to target for scan retrieval.
 
 ```
     docker run \
-      -d \
+      -it \
+      --rm \
       -e APPLICATION_MODE=receive \
       -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
       -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
@@ -120,7 +121,8 @@ parent group for the assets you wish to target for scan retrieval.
 
 ```
     docker run \
-      -d \
+      -it \
+      --rm \
       -e APPLICATION_MODE=receive \
       -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
       -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
