@@ -27,19 +27,39 @@ libraries are required.
 
 ### Set Environment Variables:
 
-| Variable                | Purpose                                         |
-|-------------------------|-------------------------------------------------|
-| APPLICATION_MODE        | Must be set to `send` or `receive`.             |
-| AWS_ACCESS_KEY_ID       | AWS API key. Used for accessing SQS queue.      |
-| AWS_SECRET_ACCESS_KEY   | AWS API secret.                                 |
-| AWS_DEFAULT_REGION      | Regional location of SQS queue.                 |
-| HALO_API_KEY            | API key for Halo. Only required for `send`.     |
-| HALO_API_SECRET_KEY     | API secret for Halo. Only required for `send`.  |
-| HALO_API_HOSTNAME       | Optional. Defaults to `api.cloudpassage.com`    |
-| HALO_MODULE             | Must be set to `events` or `scans`              |
-| SQS_QUEUE_URL           | AWS SQS Queue URL.                              |
-| START_TIME              | ISO8601 timestamp for start of stream.          |
+| Variable                | Purpose                                                           |
+|-------------------------|-------------------------------------------------------------------|
+| APPLICATION_MODE        | Must be set to `send` or `receive`.                               |
+| AWS_ACCESS_KEY_ID       | AWS API key. Used for accessing SQS queue.                        |
+| AWS_SECRET_ACCESS_KEY   | AWS API secret.                                                   |
+| AWS_DEFAULT_REGION      | Regional location of SQS queue.                                   |
+| HALO_API_KEY            | API key for Halo. Only required for `send`.                       |
+| HALO_API_SECRET_KEY     | API secret for Halo. Only required for `send`.                    |
+| HALO_API_HOSTNAME       | Optional. Defaults to `api.cloudpassage.com`                      |
+| HALO_MODULE             | Must be set to `events` or `scans`                                |
+| SQS_QUEUE_URL           | AWS SQS Queue URL.                                                |
+| START_TIME              | ISO8601 timestamp for start of stream.                            |
+| SCAN_TIMEOUT            | Optional. Seconds to wait for scan completion.  Default: 360      |
+| SCAN_FILTER             | Optional. Set filters for scan retrieval..  See 'Filters', below. |
 
+### Filters:
+
+In environments with high scan volume it may be desirable to filter the scans
+sent to SQS by this tool.  This is especially useful as an approach for
+multiplexing an extremely voluminous stream of scans across multiple SQS
+connectors.
+
+The `SCAN_FILTER` environment variable expects filter keys and values, with a
+colon separating the key and value, and a semicolon separating key-value pairs.
+For instance, if the desired effect is to only send file integrity scans that
+have the `completed_with_errors` status, which means that file integrity
+problems were detected, you would set this environment variable:
+`SCAN_FILTER="module:fim;status:completed_with_errors"`. For more information
+on filtering scans from Halo, see
+https://api-doc.cloudpassage.com/help#list-scans
+
+To filter by server group, it is easiest to create API keys in Halo at the
+parent group for the assets you wish to target for scan retrieval.
 
 ### Run:
 

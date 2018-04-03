@@ -18,6 +18,8 @@ MAINTAINER toolbox@cloudpassage.com
 
 ENV HALO_API_HOSTNAME=api.cloudpassage.com
 
+ENV SCAN_TIMEOUT=360
+
 RUN pip install pytest
 
 COPY app/ /app/

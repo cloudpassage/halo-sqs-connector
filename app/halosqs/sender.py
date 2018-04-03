@@ -23,14 +23,17 @@ class Sender(object):
                                 start_timestamp=self.config.start_time,
                                 integration_name=self.config.integration_name)
         else:
+            search_params = {"since": self.config.start_time,
+                             "sort_by": "created_at.asc"}
+            search_params.update(self.config.search_params)
             stream = HaloScans(self.config.halo_key,
                                self.config.halo_secret,
                                api_host=self.config.halo_api_hostname,
-                               search_params={"since": self.config.start_time,
-                                              "sort_by": "created_at.asc"},
+                               search_params=search_params,
                                start_timestamp=self.config.start_time,
                                integration_name=self.config.integration_name,
-                               report_performance=True)
+                               report_performance=True,
+                               scan_timeout=self.config.scan_timeout)
         return stream
 
     def print_start_message(self):

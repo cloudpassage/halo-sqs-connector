@@ -1,3 +1,3 @@
 boto3~=1.5
-https://github.com/cloudpassage/halo-scans/archive/v0.16.1.zip
+https://github.com/cloudpassage/halo-scans/archive/v0.17.zip
 https://github.com/cloudpassage/halo-events/archive/v0.11.zip

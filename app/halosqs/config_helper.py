@@ -19,6 +19,7 @@ class ConfigHelper(object):
         application_mode(str): ``send`` or ``receive``
         sqs_queue_url(str): URL for SQS queue.
         start_time(str): Timestamp for start of query.
+        scan_timeout(int): Timeout for waiting on scans to complete.
     """
 
     def __init__(self):
@@ -34,9 +35,11 @@ class ConfigHelper(object):
         self.application_mode = None
         self.sqs_queue_url = None
         self.start_time = None
+        self.scan_timeout = 360
         self.integration_name = "Halo-SQS/%s" % self.get_app_version()
         # Now set according to env.
         self.set_config_vars_from_env()
+        self.search_params = self.get_search_params()
         # Make sure we have everything we need.
         self.sanity_check_for_application_mode()
         return
@@ -53,7 +56,8 @@ class ConfigHelper(object):
         send_req = {"Halo API key": self.halo_key,
                     "Halo API secret": self.halo_secret,
                     "Halo API hostname": self.halo_api_hostname,
-                    "Halo module": self.halo_module}
+                    "Halo module": self.halo_module,
+                    "Scan timeout": self.scan_timeout}
         if self.application_mode not in ["send", "receive"]:
             raise ValueError("Mode must be \"send\" or \"receive\".")
         if self.halo_module not in ["events", "scans"]:
@@ -71,6 +75,7 @@ class ConfigHelper(object):
             raise ValueError(msg)
         if self.application_mode == "send" and self.start_time is None:
             self.start_time = self.get_last_timestamp()
+        self.scan_timeout = int(self.scan_timeout)
         return
 
     def set_config_vars_from_env(self):
@@ -83,9 +88,12 @@ class ConfigHelper(object):
                    "HALO_API_HOSTNAME": "halo_api_hostname",
                    "HALO_MODULE": "halo_module",
                    "SQS_QUEUE_URL": "sqs_queue_url",
-                   "START_TIME": "start_time"}
+                   "START_TIME": "start_time",
+                   "SCAN_TIMEOUT": "scan_timeout"}
         for envvar, varname in targets.items():
-            setattr(self, varname, os.getenv(envvar))
+            val = os.getenv(envvar)
+            if val is not None:
+                setattr(self, varname, val)
         return
 
     def get_last_timestamp(self):
@@ -111,3 +119,18 @@ class ConfigHelper(object):
         rx_compiled = re.compile(r"\s*__version__\s*=\s*\"(\S+)\"")
         ver = rx_compiled.search(raw_init_file).group(1)
         return ver
+
+    @classmethod
+    def get_search_params(cls):
+        """Derive search params from env vars."""
+        nono_chars = ["\\", ".", "/"]
+        env_var = os.getenv("SCAN_FILTER", "")
+        if env_var == "":
+            return {}
+        all_the_nonos = [nono for nono in nono_chars if nono in env_var]
+        if all_the_nonos:
+            msg = "Invalid chars %s in search params!" % str(all_the_nonos)
+            raise ValueError(msg)
+        kvs = [x for x in env_var.split(";")]
+        retval = {item.split(":")[0]: item.split(":")[1] for item in kvs}
+        return retval
