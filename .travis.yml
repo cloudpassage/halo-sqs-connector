@@ -1,0 +1,6 @@
+sudo: required
+language: python
+services:
+- docker
+script:
+- docker build -t halo-sqs-connector .

@@ -104,8 +104,10 @@ class ConfigHelper(object):
             url = "/v1/events?sort_by=created_at.desc&per_page=1"
         else:
             print("Unrecognized module: %s" % self.halo_module)
-        session = cloudpassage.HaloSession(self.halo_key, self.halo_secret,
-                                           api_host=self.halo_api_hostname)
+        session = cloudpassage.HaloSession(self.halo_key,
+                                           self.halo_secret,
+                                           api_host=self.halo_api_hostname,
+                                           integration_string=self.integration_name)
         http_helper = cloudpassage.HttpHelper(session)
         timestamp = http_helper.get(url)[self.halo_module][0]["created_at"]
         return timestamp
